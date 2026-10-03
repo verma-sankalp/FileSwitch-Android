@@ -2,6 +2,11 @@
   <img src="screenshots/app_icon.png" width="120" height="120" alt="FileSwitch App Icon" />
   <h1>FileSwitch for Android</h1>
   <p><strong>Fast, privacy-focused, 100% offline file conversion and manipulation utility for Android.</strong></p>
+  <p>
+    <a href="app/build/outputs/apk/debug/FileSwitch.apk">
+      <img src="https://img.shields.io/badge/Download-FileSwitch.apk-1857D5?style=for-the-badge&logo=android&logoColor=white" alt="Download FileSwitch APK" />
+    </a>
+  </p>
 </div>
 
 ---
@@ -13,6 +18,7 @@ FileSwitch is a native Android application for converting, transforming, repairi
 - **Developer**: Sankalp
 - **Repository**: [https://github.com/verma-sankalp/FileSwitch-Android](https://github.com/verma-sankalp/FileSwitch-Android)
 - **Minimum Requirement**: Android 7.0 (API level 24+)
+- **Target Platform**: Android 14 (API level 34)
 
 ---
 
@@ -137,21 +143,29 @@ FileSwitch is a native Android application for converting, transforming, repairi
 
 ---
 
-## Build & Installation
+## Download & Installation
 
-### Requirements
+### 📲 Download APK
+- **Direct Download**: [`FileSwitch.apk`](app/build/outputs/apk/debug/FileSwitch.apk)
+- **Releases**: Check the [GitHub Releases](https://github.com/verma-sankalp/FileSwitch-Android/releases) page for the latest stable `.apk` binaries.
+
+---
+
+### 🛠️ Building from Source
+
+#### Requirements
 - Java 17+
 - Android SDK Platform 34
 - Android Build Tools 34.0.0
 
-### Building the APK
+#### Build Command
 Run the Gradle wrapper:
 
 ```bash
 ./gradlew assembleDebug
 ```
 
-The APK will be generated at:
+The APK binary will be compiled to:
 ```text
 app/build/outputs/apk/debug/FileSwitch.apk
 ```
