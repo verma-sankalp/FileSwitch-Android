@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="screenshots/app_icon.png" width="120" height="120" alt="FileSwitch App Icon" />
+  <img src="assets/FileSwitch-App-Icon.png" width="120" height="120" alt="FileSwitch App Icon" />
   <h1>FileSwitch for Android</h1>
   <p><strong>Fast, privacy-focused, 100% offline file conversion and manipulation utility for Android.</strong></p>
   <p>
@@ -31,15 +31,15 @@ FileSwitch is a native Android application for converting, transforming, repairi
     <tr>
       <td align="center" width="33%">
         <sub><strong>Convert & Universal Hub</strong></sub><br/>
-        <img src="screenshots/Homepage-FileSwitch.jpg" width="100%" alt="Convert & Universal Hub" />
+        <img src="assets/Homepage-FileSwitch.jpg" width="100%" alt="Convert & Universal Hub" />
       </td>
       <td align="center" width="33%">
         <sub><strong>Tools & Advanced Utilities</strong></sub><br/>
-        <img src="screenshots/Tools-FileSwitch.jpg" width="100%" alt="Tools & Advanced Utilities" />
+        <img src="assets/Tools-FileSwitch.jpg" width="100%" alt="Tools & Advanced Utilities" />
       </td>
       <td align="center" width="33%">
         <sub><strong>Preferences & Settings</strong></sub><br/>
-        <img src="screenshots/Settings_FileSwitch.jpg" width="100%" alt="Preferences & Settings" />
+        <img src="assets/Settings_FileSwitch.jpg" width="100%" alt="Preferences & Settings" />
       </td>
     </tr>
   </table>
