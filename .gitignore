@@ -1,0 +1,56 @@
+# Built application files
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+
+# Gradle files
+.gradle/
+.gradle-native/
+build/
+app/build/
+*/build/
+gradle/daemon/
+
+# Local configuration files
+local.properties
+.bundle/
+
+# Android Studio & IntelliJ IDEA files
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.navigation/
+captures/
+
+# VS Code
+.vscode/
+
+# Signing keys & secrets
+*.jks
+*.keystore
+*.key
+google-services.json
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Profiler & memory dumps
+*.hprof
+
+# Environment / secrets
+.env
+.env.*
