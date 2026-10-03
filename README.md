@@ -13,7 +13,6 @@ FileSwitch is a native Android application for converting, transforming, repairi
 - **Developer**: Sankalp
 - **Repository**: [https://github.com/verma-sankalp/FileSwitch-Android](https://github.com/verma-sankalp/FileSwitch-Android)
 - **Minimum Requirement**: Android 7.0 (API level 24+)
-- **Target Platform**: Android 14 (API level 34)
 
 ---
 
