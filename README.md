@@ -19,7 +19,6 @@
 FileSwitch is a native Android application for converting, transforming, repairing, and managing files locally on your device. Designed with privacy as a foundational principle, all processing is executed 100% on-device without telemetry, background network requests, or third-party servers.
 
 - **Developer**: Sankalp
-- **Repository**: [https://github.com/verma-sankalp/FileSwitch-Android](https://github.com/verma-sankalp/FileSwitch-Android)
 - **Minimum Requirement**: Android 7.0 (API level 24+)
 
 ---
