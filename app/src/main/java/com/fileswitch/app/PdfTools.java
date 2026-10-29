@@ -27,15 +27,34 @@ final class PdfTools {
         Result(File file,String name,String mime){this.file=file;this.name=name;this.mime=mime;}
     }
 
+    private static volatile boolean initialized = false;
+
     private PdfTools() {}
 
-    static void init(android.content.Context context){PDFBoxResourceLoader.init(context.getApplicationContext());}
+    static void init(android.content.Context context) {
+        if (!initialized && context != null) {
+            synchronized (PdfTools.class) {
+                if (!initialized) {
+                    try {
+                        PDFBoxResourceLoader.init(context.getApplicationContext());
+                        initialized = true;
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+    }
 
     static ArrayList<Result> convert(ContentResolver resolver,Uri source,String sourceName,String target,int dpi,File outputDir) throws IOException {
         ArrayList<Result> outputs=new ArrayList<>();
         try(InputStream stream=resolver.openInputStream(source);PDDocument document=PDDocument.load(stream)) {
             if(document.isEncrypted()) throw new IOException("This PDF is password protected. Use PDF Unlock tool first.");
             String base=sourceName.replaceFirst("\\.[^.]*$","");if(base.isEmpty())base="converted-file";
+            if(target.equals("pdf")) {
+                File out=new File(outputDir,UUID.randomUUID()+"-"+base+".pdf");
+                document.save(out);
+                outputs.add(new Result(out,base+".pdf","application/pdf"));
+                return outputs;
+            }
             if(target.equals("txt")||target.equals("html")||target.equals("md")||target.equals("docx")) {
                 String content=new PDFTextStripper().getText(document);
                 if(target.equals("html"))content="<!doctype html><meta charset=\"utf-8\"><pre>"+escape(content)+"</pre>";
@@ -59,9 +78,35 @@ final class PdfTools {
         } catch(IOException e){throw e;} catch(Exception e){throw new IOException("This PDF could not be read",e);}
     }
 
-    static int pageCount(ContentResolver resolver,Uri source) throws IOException {try(InputStream in=resolver.openInputStream(source);PDDocument doc=PDDocument.load(in)){return doc.getNumberOfPages();}}
-    static Bitmap thumbnail(ContentResolver resolver,Uri source)throws IOException{try(InputStream in=resolver.openInputStream(source);PDDocument doc=PDDocument.load(in)){if(doc.getNumberOfPages()==0)throw new IOException("This PDF has no pages");com.tom_roush.pdfbox.pdmodel.common.PDRectangle box=doc.getPage(0).getMediaBox();double pixels=box.getWidth()/72.0*48*box.getHeight()/72.0*48;if(pixels>4_000_000)throw new IOException("PDF page is too large to preview");return new PDFRenderer(doc).renderImageWithDPI(0,48,ImageType.RGB);}}
-    static String metadata(ContentResolver resolver,Uri source) throws IOException {try(InputStream in=resolver.openInputStream(source);PDDocument doc=PDDocument.load(in)){com.tom_roush.pdfbox.pdmodel.PDDocumentInformation info=doc.getDocumentInformation();return String.format(Locale.getDefault(),"Pages: %d\nPDF version: %.1f\nTitle: %s\nAuthor: %s",doc.getNumberOfPages(),doc.getVersion(),safe(info.getTitle()),safe(info.getAuthor()));}}
+    static int pageCount(ContentResolver resolver, Uri source) throws IOException {
+        try (InputStream in = resolver.openInputStream(source); PDDocument doc = PDDocument.load(in)) {
+            if (doc.isEncrypted()) throw new IOException("This PDF is password protected. Use PDF Unlock tool first.");
+            return doc.getNumberOfPages();
+        } catch (com.tom_roush.pdfbox.pdmodel.encryption.InvalidPasswordException e) {
+            throw new IOException("This PDF is password protected. Use PDF Unlock tool first.");
+        }
+    }
+    static Bitmap thumbnail(ContentResolver resolver, Uri source) throws IOException {
+        try (InputStream in = resolver.openInputStream(source); PDDocument doc = PDDocument.load(in)) {
+            if (doc.isEncrypted()) throw new IOException("This PDF is password protected. Use PDF Unlock tool first.");
+            if (doc.getNumberOfPages() == 0) throw new IOException("This PDF has no pages");
+            com.tom_roush.pdfbox.pdmodel.common.PDRectangle box = doc.getPage(0).getMediaBox();
+            double pixels = box.getWidth() / 72.0 * 48 * box.getHeight() / 72.0 * 48;
+            if (pixels > 4_000_000) throw new IOException("PDF page is too large to preview");
+            return new PDFRenderer(doc).renderImageWithDPI(0, 48, ImageType.RGB);
+        } catch (com.tom_roush.pdfbox.pdmodel.encryption.InvalidPasswordException e) {
+            throw new IOException("This PDF is password protected. Use PDF Unlock tool first.");
+        }
+    }
+    static String metadata(ContentResolver resolver, Uri source) throws IOException {
+        try (InputStream in = resolver.openInputStream(source); PDDocument doc = PDDocument.load(in)) {
+            if (doc.isEncrypted()) return "PDF is password protected. Unlock to view metadata.";
+            com.tom_roush.pdfbox.pdmodel.PDDocumentInformation info = doc.getDocumentInformation();
+            return String.format(Locale.getDefault(), "Pages: %d\nPDF version: %.1f\nTitle: %s\nAuthor: %s", doc.getNumberOfPages(), doc.getVersion(), safe(info.getTitle()), safe(info.getAuthor()));
+        } catch (com.tom_roush.pdfbox.pdmodel.encryption.InvalidPasswordException e) {
+            return "PDF is password protected. Unlock to view metadata.";
+        }
+    }
     private static String safe(String value){return value==null||value.trim().isEmpty()?"—":value;}
     private static String escape(String value){return value.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;");}
 }
