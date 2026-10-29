@@ -85,6 +85,22 @@ final class ConversionNotificationManager {
         manager.notify(COMPLETE_ID, builder.build());
     }
 
+    void showBatchResult(int succeeded, int failed) {
+        if (!canNotify()) return;
+        manager.cancel(PROGRESS_ID);
+        Notification.Builder builder = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                ? new Notification.Builder(context, CHANNEL_ID)
+                : new Notification.Builder(context);
+
+        builder.setContentTitle("Conversion finished")
+                .setContentText(succeeded + " succeeded, " + failed + " failed")
+                .setSmallIcon(R.drawable.fileswitch_icon)
+                .setContentIntent(contentIntent())
+                .setAutoCancel(true);
+
+        manager.notify(COMPLETE_ID, builder.build());
+    }
+
     void showFailed(String reason) {
         if (!canNotify()) return;
         manager.cancel(PROGRESS_ID);
