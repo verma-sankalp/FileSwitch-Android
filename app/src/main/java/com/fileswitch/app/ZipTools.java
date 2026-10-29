@@ -121,18 +121,60 @@ final class ZipTools {
                 return extractTar(gz, dir);
             }
             ArrayList<Entry> files = new ArrayList<>();
-            File out = new File(dir, UUID.randomUUID() + "-extracted.bin");
-            try (FileOutputStream fos = new FileOutputStream(out)) {
+            File tempFile = new File(dir, UUID.randomUUID() + "-temp.tmp");
+            byte[] header = new byte[32];
+            int headerLen = 0;
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                 byte[] b = new byte[32768];
                 int n;
                 while ((n = gz.read(b)) > 0) {
+                    if (headerLen < header.length) {
+                        int copy = Math.min(n, header.length - headerLen);
+                        System.arraycopy(b, 0, header, headerLen, copy);
+                        headerLen += copy;
+                    }
                     fos.write(b, 0, n);
                 }
             } catch (IOException e) {
-                out.delete();
+                tempFile.delete();
                 throw e;
             }
-            files.add(new Entry(out, "extracted_file", mime("extracted.bin")));
+
+            String ext = "txt";
+            String mimeType = "text/plain";
+            if (headerLen >= 4 && header[0] == '%' && header[1] == 'P' && header[2] == 'D' && header[3] == 'F') {
+                ext = "pdf";
+                mimeType = "application/pdf";
+            } else if (headerLen >= 4 && (header[0] & 0xFF) == 0x89 && header[1] == 'P' && header[2] == 'N' && header[3] == 'G') {
+                ext = "png";
+                mimeType = "image/png";
+            } else if (headerLen >= 3 && (header[0] & 0xFF) == 0xFF && (header[1] & 0xFF) == 0xD8 && (header[2] & 0xFF) == 0xFF) {
+                ext = "jpg";
+                mimeType = "image/jpeg";
+            } else if (headerLen >= 4 && header[0] == 'P' && header[1] == 'K' && (header[2] == 3 || header[2] == 5) && (header[3] == 4 || header[3] == 6)) {
+                ext = "zip";
+                mimeType = "application/zip";
+            } else {
+                boolean isText = true;
+                for (int i = 0; i < headerLen; i++) {
+                    int c = header[i] & 0xFF;
+                    if (c < 9 || (c > 13 && c < 32)) {
+                        isText = false;
+                        break;
+                    }
+                }
+                if (isText && headerLen > 0) {
+                    ext = "txt";
+                    mimeType = "text/plain";
+                }
+            }
+
+            String finalName = "extracted-file." + ext;
+            File out = new File(dir, UUID.randomUUID() + "-" + finalName);
+            if (!tempFile.renameTo(out)) {
+                out = tempFile;
+            }
+            files.add(new Entry(out, finalName, mimeType));
             return files;
         }
     }
@@ -223,7 +265,12 @@ final class ZipTools {
     }
 
     private static String mime(String name) {
+        if (name == null || !name.contains(".")) return "text/plain";
         String ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
+        String mapped = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext);
+        if (mapped != null && !mapped.isEmpty() && !mapped.equalsIgnoreCase("application/octet-stream")) {
+            return mapped;
+        }
         switch (ext) {
             case "jpg":
             case "jpeg":
@@ -232,14 +279,30 @@ final class ZipTools {
                 return "image/png";
             case "webp":
                 return "image/webp";
+            case "gif":
+                return "image/gif";
+            case "bmp":
+                return "image/bmp";
             case "pdf":
                 return "application/pdf";
+            case "docx":
+                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "xlsx":
+                return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "pptx":
+                return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
             case "txt":
             case "csv":
             case "md":
+            case "json":
+            case "xml":
+            case "html":
+            case "htm":
                 return "text/plain";
+            case "zip":
+                return "application/zip";
             default:
-                return "application/octet-stream";
+                return "text/plain";
         }
     }
 }
